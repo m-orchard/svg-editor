@@ -13,16 +13,16 @@ function intent(DOMSource) {
     return selection$;
 }
 
-function model(selection$, tabs$) {
-    return Observable.combineLatest(selection$, tabs$, (selection, tabs) =>
-        ({ selection: selection, tabs: tabs })
+function model(selection$, names$) {
+    return Observable.combineLatest(selection$, names$, (selection, names) =>
+        ({ selection: selection, names: names })
     );
 }
 
 function view($state) {
     return $state.map(function(state) {
-        const vtabs = state.tabs.map((tab, index) =>
-            div('.tab' + (state.selection == index ? '.selected-tab' : ''), { dataset: { index: index } }, [tab.name])
+        const vtabs = state.names.map((name, index) =>
+            div('.tab' + (state.selection == index ? '.selected-tab' : ''), { dataset: { index: index } }, [name])
         );
         return div('.tabs', vtabs);
     });
@@ -30,13 +30,11 @@ function view($state) {
 
 function Tabs(sources) {
     const selection$ = intent(sources.DOM);
-    const state$ = model(selection$, sources.tabs$);
-    const data$ = state$.map(state => state.tabs[state.selection].data);
+    const state$ = model(selection$, sources.names$);
     const vtree$ = view(state$);
     return {
         DOM: vtree$,
-        selection$: selection$,
-        data$: data$
+        selection$: selection$
     }
 }
 

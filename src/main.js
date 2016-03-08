@@ -12,16 +12,21 @@ const initialTabs = [
 
 function main(sources) {
     const tabs$ = new BehaviorSubject(initialTabs);
-    const tabs = Tabs({ DOM: sources.DOM, tabs$: tabs$ });
+    const names$ = tabs$.map(tabs =>
+        tabs.map(tab => tab.name)
+    );
+    const tabs = Tabs({ DOM: sources.DOM, names$: names$ });
     const selection$ = tabs.selection$;
-    const editor = SVGEditor({ DOM: sources.DOM, data$: tabs.data$ });
+    const data$ = Observable.combineLatest(tabs$, selection$, (tabs, selection) =>
+        tabs[selection].data
+    );
+    const editor = SVGEditor({ DOM: sources.DOM, data$: data$ });
     const editorInput$ = editor.input$;
-
     editorInput$.subscribe(function(value) {
-        const tabaData = tabs$.getValue();
+        const tabs = tabs$.getValue();
         const selection = selection$.getValue();
-        tabaData[selection].data = value;
-        tabs$.onNext(tabaData);
+        tabs[selection].data = value;
+        tabs$.onNext(tabs);
     });
 
     const vtabs$ = tabs.DOM;
@@ -29,8 +34,9 @@ function main(sources) {
     const vapp$ = Observable.combineLatest(vtabs$, veditor$, (vtabs, veditor) =>
         div('.app', [vtabs, veditor])
     );
-
-    return { DOM: vapp$ };
+    return {
+        DOM: vapp$
+    };
 }
 
 run(main, { DOM: makeDOMDriver('body') });

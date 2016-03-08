@@ -11,7 +11,8 @@ function intent(DOMSource) {
 
 function model(input$, data$) {
     const value$ = Observable.merge(input$, data$);
-    const vnodes$ = value$.map(fromString).map(sanitizeSVGNodes);
+    const vnodes$ = value$.map(fromString)
+        .map(sanitizeSVGNodes);
     return Observable.combineLatest(value$, vnodes$, (value, vnodes) =>
         ({ value: value, nodes: vnodes })
     );
