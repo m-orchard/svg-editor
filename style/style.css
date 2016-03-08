@@ -7,8 +7,33 @@ body {
     background-color: #222222;
 }
 
-#app {
+.app {
+    display: flex;
+    flex-direction: column;
     height: 100%;
+}
+
+.tabs {
+    flex-grow: 0;
+    flex-shrink: 0;
+    display: flex;
+    align-items: flex-end;
+    padding: 0 5px;
+}
+
+.tab {
+    height: 20px;
+    padding: 10px 8px 2px 8px;
+    color: #DDDDDD;
+    cursor: pointer;
+}
+
+.tab:hover {
+    color: #FFAA66;
+}
+
+.selected-tab {
+    color: #FF8844;
 }
 
 .svg-editor {

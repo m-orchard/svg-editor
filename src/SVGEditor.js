@@ -1,7 +1,7 @@
-import {div, svg, textarea} from '@cycle/dom';
-import isolate from '@cycle/isolate';
 import {fromString, sanitizeSVGNodes} from './virtualize';
 import {Observable} from 'rx';
+import {div, svg, textarea} from '@cycle/dom';
+import isolate from '@cycle/isolate';
 
 const initialImage = '<rect x="5" y="5" height="10" width="10" fill="green"/>';
 

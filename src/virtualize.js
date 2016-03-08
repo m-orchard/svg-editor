@@ -12,9 +12,7 @@ export function sanitizeSVGNode(node) {
 }
 
 export function sanitizeSVGNodes(nodes) {
-    for(let i = 0; i < nodes.length; i++) {
-        sanitizeSVGNode(nodes[i]);
-    }
+    nodes.forEach(sanitizeSVGNode);
     return nodes;
 }
 
