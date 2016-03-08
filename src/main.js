@@ -1,5 +1,6 @@
 import Tabs from './Tabs';
 import SVGEditor from './SVGEditor';
+import storage from './storage';
 import {Observable, BehaviorSubject} from 'rx';
 import {run} from '@cycle/core';
 import {makeDOMDriver, div} from '@cycle/dom';
@@ -10,7 +11,7 @@ const initialTabs = [
 ];
 
 function main(sources) {
-    const tabs$ = new BehaviorSubject(initialTabs);
+    const tabs$ = new BehaviorSubject(storage.get('svg-data') || initialTabs);
     const names$ = tabs$.map(tabs =>
         tabs.map(tab => tab.name)
     );
@@ -26,6 +27,10 @@ function main(sources) {
         const selection = selection$.getValue();
         tabs[selection].data = value;
         tabs$.onNext(tabs);
+    });
+
+    tabs$.subscribe(function(data) {
+        storage.set('svg-data', data);
     });
 
     const vtabs$ = tabs.DOM;
