@@ -1,3 +1,4 @@
+import {Observable} from 'rx';
 import {div} from '@cycle/dom';
 import isolate from '@cycle/isolate';
 
@@ -7,14 +8,17 @@ function intent(DOMSource) {
         .map(ev => Number(ev.target.dataset.index));
 }
 
-function model(value$) {
-    return value$.startWith(0).map(index => ({ selectedIndex: index, tabs: ['tab 1', 'tab 2'] }));
+function model(value$, tabs$) {
+    const selectedIndex$ = value$.startWith(0);
+    return Observable.combineLatest(selectedIndex$, tabs$, (selectedIndex, tabs) =>
+        ({ selectedIndex: selectedIndex, tabs: tabs })
+    );
 }
 
 function view($state) {
     return $state.map(function(state) {
-        const vtabs = state.tabs.map((name, index) =>
-            div('.tab' + (state.selectedIndex == index ? '.selected-tab' : ''), { dataset: { index: index } }, [name])
+        const vtabs = state.tabs.map((tab, index) =>
+            div('.tab' + (state.selectedIndex == index ? '.selected-tab' : ''), { dataset: { index: index } }, [tab.name])
         );
         return div('.tabs', vtabs);
     });
@@ -22,10 +26,12 @@ function view($state) {
 
 function Tabs(sources) {
     const value$ = intent(sources.DOM);
-    const state$ = model(value$);
+    const state$ = model(value$, sources.tabs$);
+    const selectedData$ = state$.map(state => state.tabs[state.selectedIndex].data);
     const vtree$ = view(state$);
     return {
-        DOM: vtree$
+        DOM: vtree$,
+        selectedData$: selectedData$
     }
 }
 
