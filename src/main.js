@@ -12,21 +12,18 @@ const initialTabs = [
 
 function main(sources) {
     const tabs$ = new BehaviorSubject(storage.get('svg-data') || initialTabs);
-    const names$ = tabs$.map(tabs =>
-        tabs.map(tab => tab.name)
-    );
+    const names$ = tabs$.map(tabs => tabs.map(tab => tab.name));
     const tabs = Tabs({ DOM: sources.DOM, names$: names$ });
+
     const selection$ = tabs.selection$;
-    const data$ = Observable.combineLatest(tabs$, selection$, (tabs, selection) =>
-        tabs[selection].data
-    );
+    const data$ = Observable.combineLatest(tabs$, selection$, (tabs, selection) => tabs[selection].data);
     const editor = SVGEditor({ DOM: sources.DOM, data$: data$ });
-    const editorInput$ = editor.input$;
-    editorInput$.subscribe(function(value) {
-        const tabs = tabs$.getValue();
+    const input$ = editor.input$;
+    input$.subscribe(function(value) {
+        const tabData = tabs$.getValue();
         const selection = selection$.getValue();
-        tabs[selection].data = value;
-        tabs$.onNext(tabs);
+        tabData[selection].data = value;
+        tabs$.onNext(tabData);
     });
 
     tabs$.subscribe(function(data) {
@@ -35,9 +32,7 @@ function main(sources) {
 
     const vtabs$ = tabs.DOM;
     const veditor$ = editor.DOM;
-    const vapp$ = Observable.combineLatest(vtabs$, veditor$, (vtabs, veditor) =>
-        div('.app', [vtabs, veditor])
-    );
+    const vapp$ = Observable.combineLatest(vtabs$, veditor$, (vtabs, veditor) => div('.app', [vtabs, veditor]));
     return {
         DOM: vapp$
     };

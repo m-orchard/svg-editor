@@ -7,9 +7,7 @@ function intent(DOMSource) {
     const click$ = DOMSource.select('.tab')
         .events('click')
         .map(ev => Number(ev.target.dataset.index));
-    click$.subscribe(function(value) {
-        selection$.onNext(value);
-    });
+    click$.subscribe(selection$);
     return selection$;
 }
 
