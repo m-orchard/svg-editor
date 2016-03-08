@@ -6,7 +6,7 @@ import {Observable} from 'rx';
 const initialImage = '<rect x="5" y="5" height="10" width="10" fill="green"/>';
 
 function intent(DOMSource) {
-    return DOMSource.select('.input')
+    return DOMSource.select('.svg-editor-input')
         .events('input')
         .map(ev => ev.target.value);
 }
