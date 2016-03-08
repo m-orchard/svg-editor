@@ -9,10 +9,10 @@ function intent(DOMSource) {
         .map(ev => ev.target.value);
 }
 
-function model(value$, data$) {
-    const inputValue$ = Observable.merge(value$, data$);
-    const vnodes$ = inputValue$.map(fromString).map(sanitizeSVGNodes);
-    return Observable.combineLatest(inputValue$, vnodes$, (value, vnodes) =>
+function model(input$, data$) {
+    const value$ = Observable.merge(input$, data$);
+    const vnodes$ = value$.map(fromString).map(sanitizeSVGNodes);
+    return Observable.combineLatest(value$, vnodes$, (value, vnodes) =>
         ({ value: value, nodes: vnodes })
     );
 }
@@ -27,11 +27,12 @@ function view(state$) {
 }
 
 function SVGEditor(sources) {
-    const value$ = intent(sources.DOM);
-    const state$ = model(value$, sources.data$);
+    const input$ = intent(sources.DOM);
+    const state$ = model(input$, sources.data$);
     const vtree$ = view(state$);
     return {
-        DOM: vtree$
+        DOM: vtree$,
+        input$: input$
     };
 }
 
