@@ -1,6 +1,5 @@
 import Tabs from './Tabs';
 import SVGEditor from './SVGEditor';
-import storage from './storage';
 import {Observable, BehaviorSubject} from 'rx';
 import {run} from '@cycle/core';
 import {makeDOMDriver, div} from '@cycle/dom';
