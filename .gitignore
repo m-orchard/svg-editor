@@ -1,3 +1,4 @@
 .vscode
 dist
+test/built
 node_modules

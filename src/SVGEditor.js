@@ -1,4 +1,4 @@
-import {fromString, sanitizeSVGNodes} from './virtualize';
+import {fromString, sanitizeSVG} from './virtualize';
 import {Observable} from 'rx';
 import {div, svg, textarea} from '@cycle/dom';
 import isolate from '@cycle/isolate';
@@ -12,7 +12,7 @@ function intent(DOMSource) {
 function model(input$, data$) {
     const value$ = Observable.merge(input$, data$);
     const vnodes$ = value$.map(fromString)
-        .map(sanitizeSVGNodes);
+        .map(sanitizeSVG);
     return Observable.combineLatest(value$, vnodes$, (value, vnodes) =>
         ({ value: value, nodes: vnodes })
     );
