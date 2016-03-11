@@ -6,7 +6,6 @@ const converter = converterFactory({ VNode: VNode, VText: VText });
 const svgNamespace = 'http://www.w3.org/2000/svg';
 
 function sanitizeSVGNode(node) {
-    node.tagName = node.tagName.toLowerCase();
     node.namespace = svgNamespace;
     if(node.children) {
         sanitizeSVG(node.children);

@@ -6,12 +6,12 @@
     "build": "npm run -s build:js && npm run -s build:css",
     "build:js": "echo Building JavaScript... && mkdirp dist && browserify src/main.js -o dist/bundle.js -t [ babelify ] && echo JavaScript built!",
     "build:css": "echo Building CSS... && mkdirp dist && cp style/style.css dist && echo CSS built!",
-    "test": "mocha test/*.js --compilers js:babel-register",
-    "build:test": "echo Building tests... && mkdirp test/built && browserify test/SVGEditor.js -o test/built/test.js -t [ babelify ] && echo Tests built!",
+    "test": "mocha test/specs/*.js -t 20000 --compilers js:babel-register",
+    "build:test": "echo Building tests... && mkdirp test/built && browserify test/main.js -o test/built/test.js -t [ babelify ] && echo Tests built!",
     "watch": "concurrently -p \"none\" \"npm run -s watch:js\" \"npm run -s watch:css\"",
-    "watch:js": "watch \"npm run -s build:js\" src",
-    "watch:css": "watch \"npm run -s build:css\" style",
-    "watch:test": "watch \"npm run -s build:test\" src"
+    "watch:js": "watch --wait 10 \"npm run -s build:js\" src",
+    "watch:css": "watch --wait 10 \"npm run -s build:css\" style",
+    "watch:test": "watch --wait 10 \"npm run -s build:test\" src test/specs"
   },
   "keywords": [
     "svg"
@@ -31,6 +31,7 @@
     "babelify": "^7.2.0",
     "browserify": "^13.0.0",
     "chai": "^3.5.0",
+    "concurrently": "^2.0.0",
     "mkdirp": "^0.5.1",
     "mocha": "^2.4.5",
     "mocha:jsdom": "^1.1.0"
