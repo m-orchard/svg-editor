@@ -1,11 +1,13 @@
-import jsdom from 'mocha-jsdom';
-import {expect} from 'chai';
+import chai from 'chai';
+import setup from '../helpers/setup';
+import StreamCallback from '../helpers/StreamCallback';
 import TextArea from '../../src/TextArea';
 import {mockDOMSource} from '@cycle/dom';
 import {Subject} from 'rx';
 
 describe('TextArea', () => {
-    jsdom();
+    setup();
+    const expect = chai.expect;
 
     let textArea, input$, data$;
 
@@ -23,26 +25,74 @@ describe('TextArea', () => {
     });
 
     describe('DOM', () => {
-        it('displays input value', () => {
-            const input = '<rect></rect>';
+        it('renders an input value', () => {
+            const callback = StreamCallback();
+            textArea.DOM.subscribe(callback);
 
-            textArea.DOM.subscribe((vtree) => {
-                expect(vtree.tagName).to.equal('TEXTAREA');
-                expect(vtree.properties.value).to.equal(input);
-            });
-
+            const input = 'some input';
             input$.onNext({ target: { value: input } });
+
+            const vtree = callback.lastEvent();
+            expect(vtree.tagName).to.equal('TEXTAREA');
+            expect(vtree.properties.value).to.equal(input);
         });
 
-        it('displays data value', () => {
-            const data = '<rect></rect>';
+        it('renders a data value', () => {
+            const callback = StreamCallback();
+            textArea.DOM.subscribe(callback);
 
-            textArea.DOM.subscribe((vtree) => {
-                expect(vtree.tagName).to.equal('TEXTAREA');
-                expect(vtree.properties.value).to.equal(data);
-            });
-
+            const data = 'some data';
             data$.onNext(data);
+
+            const vtree = callback.lastEvent();
+            expect(vtree.tagName).to.equal('TEXTAREA');
+            expect(vtree.properties.value).to.equal(data);
+        });
+    });
+
+    describe('value$', () => {
+        it('exposes an input value', () => {
+            const callback = StreamCallback();
+            textArea.value$.subscribe(callback);
+
+            const input = 'some input';
+            input$.onNext({ target: { value: input } });
+
+            const value = callback.lastEvent();
+            expect(value).to.equal(input);
+        });
+
+        it('exposes a data value', () => {
+            const callback = StreamCallback();
+            textArea.value$.subscribe(callback);
+
+            const data = 'some data';
+            data$.onNext(data);
+
+            const value = callback.lastEvent();
+            expect(value).to.equal(data);
+        });
+    });
+
+    describe('input$', () => {
+        it('exposes an input value', () => {
+            const callback = StreamCallback();
+            textArea.input$.subscribe(callback);
+
+            const input = 'some input';
+            input$.onNext({ target: { value: input } });
+
+            const result = callback.lastEvent();
+            expect(result).to.equal(input);
+        });
+
+        it('does not expose a data value', () => {
+            const spy = chai.spy(() => {});
+            textArea.input$.subscribe(spy);
+
+            data$.onNext('some data');
+
+            expect(spy).not.to.be.called();
         });
     });
 });

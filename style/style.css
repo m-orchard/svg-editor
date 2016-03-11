@@ -14,18 +14,42 @@ body {
     font-family: monospace;
 }
 
+.button {
+    flex-grow: 0;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    padding: 10px 0 2px 0;
+    text-align: center;
+    color: #FFFFFF;
+    cursor: pointer;
+}
+
+.button:hover {
+    color: #FFAA66;
+}
+
+.button:active {
+    color: #FF8844;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    padding: 0 5px;
+}
+
 .tabs {
     flex-grow: 0;
     flex-shrink: 0;
     display: flex;
     align-items: flex-end;
-    padding: 0 5px;
 }
 
 .tab {
     height: 20px;
     padding: 10px 8px 2px 8px;
-    color: #DDDDDD;
+    color: #FFFFFF;
     cursor: pointer;
 }
 
@@ -51,7 +75,7 @@ body {
     padding: 5px;
     margin: 5px;
     background-color: #111111;
-    color: #DDDDDD;
+    color: #FFFFFF;
     border: none;
     resize: none;
 }
