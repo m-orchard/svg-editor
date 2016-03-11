@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import VNode from 'virtual-dom/vnode/vnode';
 import VText from 'virtual-dom/vnode/vtext';
 import converterFactory from 'html-to-vdom';
@@ -23,5 +24,9 @@ export function sanitizeSVG(nodes) {
 }
 
 export function fromString(html) {
-    return converter(html);
+    try {
+        return converter(DOMPurify.sanitize(html));
+    } catch(e) {
+        return [];
+    }
 }

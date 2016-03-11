@@ -22,6 +22,7 @@
     "@cycle/core": "^6.0.3",
     "@cycle/dom": "^9.1.0",
     "@cycle/isolate": "^1.2.0",
+    "dompurify": "^0.7.4",
     "html-to-vdom": "^0.7.0",
     "rx": "^4.0.8"
   },
@@ -34,7 +35,8 @@
     "concurrently": "^2.0.0",
     "mkdirp": "^0.5.1",
     "mocha": "^2.4.5",
-    "mocha:jsdom": "^1.1.0"
+    "mocha:jsdom": "^1.1.0",
+    "watch": "^0.17.1"
   },
   "babel": {
     "presets": [
