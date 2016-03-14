@@ -16,10 +16,18 @@ const initialSelection = 0;
 function main(sources) {
     const storedData = storage.get('svg-data');
     const svgs$ = new BehaviorSubject(storedData ? storedData.svgs : initialSVGs);
+
     const names$ = svgs$.map(svgs => svgs.map(svg => svg.name));
     const tabs = Tabs({ DOM: sources.DOM, names$: names$ });
+
     const selection$ = tabs.selection$;
-    selection$.onNext(storedData ? storedData.selection : initialSelection);
+    const selection = storedData ? storedData.selection : initialSelection;
+    selection$.onNext(selection);
+
+    const state$ = Observable.combineLatest(svgs$, selection$, (svgs, selection) => ({ svgs: svgs, selection: selection }));
+    state$.subscribe(state => {
+        storage.set('svg-data', state);
+    });
 
     const addTabButtonProps$ = Observable.of({ label: '+' });
     const addTabButton = Button({ DOM: sources.DOM, props$: addTabButtonProps$ });
@@ -31,16 +39,8 @@ function main(sources) {
         selection$.onNext(svgCount - 1);
     });
 
-    const state$ = Observable.combineLatest(svgs$, selection$, (svgs, selection) => ({ svgs: svgs, selection: selection }));
-    state$.subscribe(state => {
-        storage.set('svg-data', state);
-    });
-
     const currentData$ = state$.map(state => state.svgs[state.selection].data);
     const svgInput = TextArea({ DOM: sources.DOM, data$: currentData$ });
-    const value$ = svgInput.value$;
-    const svgRenderer = SVGRenderer({ value$: value$ });
-
     const input$ = svgInput.input$;
     input$.subscribe(value => {
         const svgs = svgs$.getValue();
@@ -49,10 +49,11 @@ function main(sources) {
         svgs$.onNext(svgs);
     });
 
-    const vtabs$ = tabs.DOM;
-    const vaddTabButton$ = addTabButton.DOM;
-    const vcontrols$ = Observable.combineLatest(vtabs$, vaddTabButton$, (tabs, addTabButton) => div('.controls', [tabs, addTabButton]));
-    const veditor$ = Observable.combineLatest(svgInput.DOM, svgRenderer.DOM, (input, renderer) => div('.svg-editor', [input, renderer]));
+    const value$ = svgInput.value$;
+    const svgRenderer = SVGRenderer({ value$: value$ });
+
+    const vcontrols$ = Observable.combineLatest(tabs.DOM, addTabButton.DOM, (vtabs, vaddTabButton) => div('.controls', [vtabs, vaddTabButton]));
+    const veditor$ = Observable.combineLatest(svgInput.DOM, svgRenderer.DOM, (vinput, vrenderer) => div('.svg-editor', [vinput, vrenderer]));
     const vapp$ = Observable.combineLatest(vcontrols$, veditor$, (vcontrols, veditor) => div('.app', [vcontrols, veditor]));
     return {
         DOM: vapp$
