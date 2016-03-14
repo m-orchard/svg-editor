@@ -1,5 +1,5 @@
 import Tabs from './Tabs';
-import Button from './Button';
+import AddTabButton from './AddTabButton';
 import TextArea from './TextArea';
 import SVGRenderer from './SVGRenderer';
 import storage from './storage';
@@ -29,23 +29,16 @@ function main(sources) {
         storage.set('svg-data', state);
     });
 
-    const addTabButtonProps$ = Observable.of({ label: '+' });
-    const addTabButton = Button({ DOM: sources.DOM, props$: addTabButtonProps$ });
-    const addTabClick$ = addTabButton.click$;
-    addTabClick$.subscribe(() => {
-        const svgs = svgs$.getValue();
-        const svgCount = svgs.push({ name: 'svg', data: '' });
-        svgs$.onNext(svgs);
-        selection$.onNext(svgCount - 1);
-    });
+    const addTabProps$ = Observable.of({ tabName: 'svg' });
+    const addTabButton = AddTabButton({ DOM: sources.DOM, tabs$: svgs$, selection$: selection$, props$: addTabProps$ });
 
     const currentData$ = state$.map(state => state.svgs[state.selection].data);
     const svgInput = TextArea({ DOM: sources.DOM, data$: currentData$ });
     const input$ = svgInput.input$;
     input$.subscribe(value => {
-        const svgs = svgs$.getValue();
+        const svgs = svgs$.getValue().slice();
         const selection = selection$.getValue();
-        svgs[selection].data = value;
+        svgs[selection] = { name: svgs[selection].name, data: value };
         svgs$.onNext(svgs);
     });
 
