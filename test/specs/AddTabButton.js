@@ -1,4 +1,4 @@
-import chai from 'chai';
+import {expect} from 'chai';
 import setup from '../helpers/setup';
 import StreamCallback from '../helpers/StreamCallback';
 import AddTabButton from '../../src/AddTabButton';
@@ -7,7 +7,6 @@ import {Observable, Subject, BehaviorSubject} from 'rx';
 
 describe('AddTabButton', () => {
     setup();
-    const expect = chai.expect;
 
     const tabName = 'new tab';
     let button, tabs$, selection$, props$, click$;

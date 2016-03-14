@@ -39,6 +39,11 @@ body {
     padding: 0 5px;
 }
 
+.right-controls {
+    flex-grow: 1;
+    flex-direction: row-reverse;
+}
+
 .tabs {
     flex-grow: 0;
     flex-shrink: 0;
