@@ -3,17 +3,14 @@ import {div} from '@cycle/dom';
 import isolate from '@cycle/isolate';
 
 function intent(DOMSource) {
-    const selection$ = new BehaviorSubject(0);
-    const click$ = DOMSource.select('.tab')
+    return DOMSource.select('.tab')
         .events('click')
         .map(ev => Number(ev.target.dataset.index));
-    click$.subscribe(selection$);
-    return selection$;
 }
 
-function model(selection$, names$) {
-    return Observable.combineLatest(selection$, names$, (selection, names) =>
-        ({ selection: selection, names: names })
+function model(names$, selection$) {
+    return Observable.combineLatest(names$, selection$, (names, selection) =>
+        ({ names: names, selection: selection })
     );
 }
 
@@ -27,13 +24,15 @@ function view($state) {
 }
 
 function Tabs(sources) {
-    const selection$ = intent(sources.DOM);
-    const state$ = model(selection$, sources.names$);
+    const click$ = intent(sources.DOM);
+    const selection$ = new BehaviorSubject(0);
+    click$.subscribe(selection$);
+    const state$ = model(sources.names$, selection$);
     const vtree$ = view(state$);
     return {
         DOM: vtree$,
         selection$: selection$
-    }
+    };
 }
 
 export default sources => isolate(Tabs)(sources);

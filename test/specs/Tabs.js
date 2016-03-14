@@ -119,7 +119,7 @@ describe('Tabs', () => {
             expect(vtree.children[1].children[0].text).to.equal(secondName);
         });
 
-        it('changes the selected tab', () => {
+        it('changes the selected tab when clicked', () => {
             const callback = StreamCallback();
             tabs.DOM.subscribe(callback);
 
@@ -127,6 +127,27 @@ describe('Tabs', () => {
             const secondName = 'second tab';
             names$.onNext([firstName, secondName]);
             click$.onNext({ target: { dataset: { index: 1 } } })
+
+            const vtree = callback.lastEvent();
+            expect(vtree.tagName).to.equal('DIV');
+            expect(vtree.properties.className).to.equal('tabs');
+            expect(vtree.children.length).to.equal(2);
+            expect(vtree.children[0].tagName).to.equal('DIV');
+            expect(vtree.children[0].properties.className).to.equal('tab');
+            expect(vtree.children[0].children[0].text).to.equal(firstName);
+            expect(vtree.children[1].tagName).to.equal('DIV');
+            expect(vtree.children[1].properties.className).to.equal('tab selected-tab');
+            expect(vtree.children[1].children[0].text).to.equal(secondName);
+        });
+
+        it('changes the selected tab when selected externally', () => {
+            const callback = StreamCallback();
+            tabs.DOM.subscribe(callback);
+
+            const firstName = 'first tab';
+            const secondName = 'second tab';
+            names$.onNext([firstName, secondName]);
+            tabs.selection$.onNext(1);
 
             const vtree = callback.lastEvent();
             expect(vtree.tagName).to.equal('DIV');
@@ -155,6 +176,16 @@ describe('Tabs', () => {
             tabs.selection$.subscribe(callback);
 
             click$.onNext({ target: { dataset: { index: 1 } } });
+
+            const selection = callback.lastEvent();
+            expect(selection).to.equal(1);
+        });
+
+        it('selects the second tab when selected externally', () => {
+            const callback = StreamCallback();
+            tabs.selection$.subscribe(callback);
+
+            tabs.selection$.onNext(1);
 
             const selection = callback.lastEvent();
             expect(selection).to.equal(1);
