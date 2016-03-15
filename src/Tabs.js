@@ -1,4 +1,4 @@
-import {Observable, BehaviorSubject} from 'rx';
+import {Observable} from 'rx';
 import {div} from '@cycle/dom';
 import isolate from '@cycle/isolate';
 
@@ -27,15 +27,11 @@ function view($state) {
 
 function Tabs(sources) {
     const click$ = intent(sources.DOM);
-    const selection$ = new BehaviorSubject(0);
-    click$.subscribe(selection$);
-    const state$ = model(sources.names$, selection$);
-    const validSelection$ = state$.map(state => (0 <= state.selection && state.selection < state.names.length));
+    click$.subscribe(sources.selection$);
+    const state$ = model(sources.names$, sources.selection$);
     const vtree$ = view(state$);
     return {
-        DOM: vtree$,
-        selection$: selection$,
-        validSelection$: validSelection$
+        DOM: vtree$
     };
 }
 

@@ -8,11 +8,12 @@ import {Subject} from 'rx';
 describe('Tabs', () => {
     setup();
 
-    let tabs, names$, click$;
+    let tabs, click$, names$, selection$;
 
     beforeEach(() => {
         click$ = new Subject();
         names$ = new Subject();
+        selection$ = new Subject();
 
         tabs = Tabs({
             DOM: mockDOMSource({
@@ -20,7 +21,8 @@ describe('Tabs', () => {
                     'click': click$
                 }
             }),
-            names$: names$
+            names$: names$,
+            selection$: selection$
         });
     });
 
@@ -49,7 +51,7 @@ describe('Tabs', () => {
             expect(vtree.properties.className).to.equal('tabs');
             expect(vtree.children.length).to.equal(1);
             expect(vtree.children[0].tagName).to.equal('DIV');
-            expect(vtree.children[0].properties.className).to.equal('tab selected-tab');
+            expect(vtree.children[0].properties.className).to.equal('tab');
             expect(vtree.children[0].children[0].text).to.equal(name);
         });
 
@@ -66,7 +68,7 @@ describe('Tabs', () => {
             expect(vtree.properties.className).to.equal('tabs');
             expect(vtree.children.length).to.equal(2);
             expect(vtree.children[0].tagName).to.equal('DIV');
-            expect(vtree.children[0].properties.className).to.equal('tab selected-tab');
+            expect(vtree.children[0].properties.className).to.equal('tab');
             expect(vtree.children[0].children[0].text).to.equal(firstName);
             expect(vtree.children[1].tagName).to.equal('DIV');
             expect(vtree.children[1].properties.className).to.equal('tab');
@@ -88,7 +90,7 @@ describe('Tabs', () => {
             expect(vtree.properties.className).to.equal('tabs');
             expect(vtree.children.length).to.equal(3);
             expect(vtree.children[0].tagName).to.equal('DIV');
-            expect(vtree.children[0].properties.className).to.equal('tab selected-tab');
+            expect(vtree.children[0].properties.className).to.equal('tab');
             expect(vtree.children[0].children[0].text).to.equal(firstName);
             expect(vtree.children[1].tagName).to.equal('DIV');
             expect(vtree.children[1].properties.className).to.equal('tab');
@@ -113,7 +115,7 @@ describe('Tabs', () => {
             expect(vtree.properties.className).to.equal('tabs');
             expect(vtree.children.length).to.equal(2);
             expect(vtree.children[0].tagName).to.equal('DIV');
-            expect(vtree.children[0].properties.className).to.equal('tab selected-tab');
+            expect(vtree.children[0].properties.className).to.equal('tab');
             expect(vtree.children[0].children[0].text).to.equal(firstName);
             expect(vtree.children[1].tagName).to.equal('DIV');
             expect(vtree.children[1].properties.className).to.equal('tab');
@@ -148,7 +150,7 @@ describe('Tabs', () => {
             const firstName = 'first tab';
             const secondName = 'second tab';
             names$.onNext([firstName, secondName]);
-            tabs.selection$.onNext(1);
+            selection$.onNext(1);
 
             const vtree = callback.lastEvent();
             expect(vtree.tagName).to.equal('DIV');
@@ -164,9 +166,39 @@ describe('Tabs', () => {
     });
 
     describe('selection$', () => {
-        it('selects the first tab by default', () => {
+        it('has no selection by default', () => {
             const callback = StreamCallback();
-            tabs.selection$.subscribe(callback);
+            selection$.subscribe(callback);
+
+            const selection = callback.lastEvent();
+            expect(selection).to.be.undefined;
+        });
+
+        it('selects no tab when selected externally', () => {
+            const callback = StreamCallback();
+            selection$.subscribe(callback);
+
+            selection$.onNext(-1);
+
+            const selection = callback.lastEvent();
+            expect(selection).to.equal(-1);
+        });
+
+        it('selects the first tab when clicked', () => {
+            const callback = StreamCallback();
+            selection$.subscribe(callback);
+
+            click$.onNext({ target: { dataset: { index: 0 } } });
+
+            const selection = callback.lastEvent();
+            expect(selection).to.equal(0);
+        });
+
+        it('selects the first tab when selected externally', () => {
+            const callback = StreamCallback();
+            selection$.subscribe(callback);
+
+            selection$.onNext(0);
 
             const selection = callback.lastEvent();
             expect(selection).to.equal(0);
@@ -174,7 +206,7 @@ describe('Tabs', () => {
 
         it('selects the second tab when clicked', () => {
             const callback = StreamCallback();
-            tabs.selection$.subscribe(callback);
+            selection$.subscribe(callback);
 
             click$.onNext({ target: { dataset: { index: 1 } } });
 
@@ -184,87 +216,12 @@ describe('Tabs', () => {
 
         it('selects the second tab when selected externally', () => {
             const callback = StreamCallback();
-            tabs.selection$.subscribe(callback);
+            selection$.subscribe(callback);
 
-            tabs.selection$.onNext(1);
+            selection$.onNext(1);
 
             const selection = callback.lastEvent();
             expect(selection).to.equal(1);
-        });
-    });
-
-    describe('validSelection$', () => {
-        it('is invalid with the default selection on no tabs', () => {
-            const callback = StreamCallback();
-            tabs.validSelection$.subscribe(callback);
-
-            const valid = callback.lastEvent();
-            expect(valid).to.be.false;
-        });
-
-        it('is valid with the default selection on a single tab', () => {
-            const callback = StreamCallback();
-            tabs.validSelection$.subscribe(callback);
-            names$.onNext(['first tab']);
-
-            const valid = callback.lastEvent();
-            expect(valid).to.be.true;
-        });
-
-        it('is valid when the second tab is clicked with two tabs', () => {
-            const callback = StreamCallback();
-            tabs.validSelection$.subscribe(callback);
-            names$.onNext(['first tab', 'second tab']);
-
-            click$.onNext({ target: { dataset: { index: 1 } } });
-
-            const valid = callback.lastEvent();
-            expect(valid).to.be.true;
-        });
-
-        it('is valid when the second tab is selected externally with two tabs', () => {
-            const callback = StreamCallback();
-            tabs.validSelection$.subscribe(callback);
-            names$.onNext(['first tab', 'second tab']);
-
-            tabs.selection$.onNext(1);
-
-            const valid = callback.lastEvent();
-            expect(valid).to.be.true;
-        });
-
-        it('is invalid when an index past the number of tabs is selected externally', () => {
-            const callback = StreamCallback();
-            tabs.validSelection$.subscribe(callback);
-            names$.onNext(['first tab', 'second tab']);
-
-            tabs.selection$.onNext(2);
-
-            const valid = callback.lastEvent();
-            expect(valid).to.be.false;
-        });
-
-        it('is invalid when an invalid index is selected externally', () => {
-            const callback = StreamCallback();
-            tabs.validSelection$.subscribe(callback);
-            names$.onNext(['first tab', 'second tab']);
-
-            tabs.selection$.onNext(-1);
-
-            const valid = callback.lastEvent();
-            expect(valid).to.be.false;
-        });
-
-        it('is invalid when all tabs are removed', () => {
-            const callback = StreamCallback();
-            tabs.validSelection$.subscribe(callback);
-            names$.onNext(['first tab', 'second tab']);
-            tabs.selection$.onNext(1);
-
-            names$.onNext([]);
-
-            const valid = callback.lastEvent();
-            expect(valid).to.be.false;
         });
     });
 });
