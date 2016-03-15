@@ -8,7 +8,8 @@ function intent(DOMSource) {
 }
 
 function view(props$) {
-    return props$.map(props => div('.button', [props.label]));
+    return props$.startWith('')
+        .map(props => div('.button', [props.label]));
 }
 
 function Button(sources) {

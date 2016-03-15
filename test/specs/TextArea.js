@@ -9,18 +9,20 @@ describe('TextArea', () => {
     setup();
     const expect = chai.expect;
 
-    let textArea, input$, data$;
+    let textArea, input$, data$, enabled$;
 
     beforeEach(() => {
         input$ = new Subject();
         data$ = new Subject();
+        enabled$ = new Subject();
         textArea = TextArea({
             DOM: mockDOMSource({
                 ':root': {
                     'input': input$
                 }
             }),
-            data$: data$
+            data$: data$,
+            enabled$: enabled$
         });
     });
 
@@ -47,6 +49,35 @@ describe('TextArea', () => {
             const vtree = callback.lastEvent();
             expect(vtree.tagName).to.equal('TEXTAREA');
             expect(vtree.properties.value).to.equal(data);
+        });
+
+        it('does not have a disabled attribute when enabled', () => {
+            const callback = StreamCallback();
+            textArea.DOM.subscribe(callback);
+
+            const vtree = callback.lastEvent();
+            expect(vtree.properties.attributes.disabled).to.be.undefined;
+        });
+
+        it('has a disabled attribute when disabled', () => {
+            const callback = StreamCallback();
+            textArea.DOM.subscribe(callback);
+
+            enabled$.onNext(false);
+
+            const vtree = callback.lastEvent();
+            expect(vtree.properties.attributes.disabled).to.be.true;
+        });
+
+        it('does not have a disabled attribute when reenabled', () => {
+            const callback = StreamCallback();
+            textArea.DOM.subscribe(callback);
+
+            enabled$.onNext(false);
+            enabled$.onNext(true);
+
+            const vtree = callback.lastEvent();
+            expect(vtree.properties.attributes.disabled).to.be.undefined;
         });
     });
 

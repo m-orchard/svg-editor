@@ -9,7 +9,9 @@ function intent(DOMSource) {
 }
 
 function model(names$, selection$) {
-    return Observable.combineLatest(names$, selection$, (names, selection) =>
+    const initialNames$ = names$.startWith([]);
+    const initialSelection$ = selection$.startWith(-1);
+    return Observable.combineLatest(initialNames$, initialSelection$, (names, selection) =>
         ({ names: names, selection: selection })
     );
 }

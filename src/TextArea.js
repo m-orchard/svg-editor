@@ -8,18 +8,28 @@ function intent(DOMSource) {
         .map(ev => ev.target.value);
 }
 
-function model(value$) {
-    return value$.map(value => ({ value: value }));
+function model(value$, enabled$) {
+    const initialValue$ = value$.startWith('');
+    const initialEnabled$ = enabled$.startWith(true);
+    return Observable.combineLatest(initialValue$, initialEnabled$, (value, enabled) =>
+        ({ value: value, enabled: enabled })
+    );
 }
 
 function view(state$) {
-    return state$.map(state => textarea({ value: state.value }));
+    return state$.map(state => {
+        const attributes = {};
+        if(!state.enabled) {
+            attributes.disabled = true;
+        }
+        return textarea({ value: state.value, attributes: attributes })
+    });
 }
 
 function TextArea(sources) {
     const input$ = intent(sources.DOM);
     const value$ = Observable.merge(input$, sources.data$)
-    const state$ = model(value$);
+    const state$ = model(value$, sources.enabled$);
     const vtree$ = view(state$);
     return {
         DOM: vtree$,

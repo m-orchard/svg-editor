@@ -3,7 +3,8 @@ import {svg} from '@cycle/dom';
 import isolate from '@cycle/isolate';
 
 function model(value$) {
-    return value$.map(fromString)
+    return value$.startWith('')
+        .map(fromString)
         .map(sanitizeSVG)
         .map(vnodes => ({ nodes: vnodes }));
 }
