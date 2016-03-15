@@ -30,10 +30,12 @@ function Tabs(sources) {
     const selection$ = new BehaviorSubject(0);
     click$.subscribe(selection$);
     const state$ = model(sources.names$, selection$);
+    const validSelection$ = state$.map(state => (0 <= state.selection && state.selection < state.names.length));
     const vtree$ = view(state$);
     return {
         DOM: vtree$,
-        selection$: selection$
+        selection$: selection$,
+        validSelection$: validSelection$
     };
 }
 

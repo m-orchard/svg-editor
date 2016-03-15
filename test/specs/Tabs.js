@@ -49,6 +49,7 @@ describe('Tabs', () => {
             expect(vtree.properties.className).to.equal('tabs');
             expect(vtree.children.length).to.equal(1);
             expect(vtree.children[0].tagName).to.equal('DIV');
+            expect(vtree.children[0].properties.className).to.equal('tab selected-tab');
             expect(vtree.children[0].children[0].text).to.equal(name);
         });
 
@@ -189,6 +190,81 @@ describe('Tabs', () => {
 
             const selection = callback.lastEvent();
             expect(selection).to.equal(1);
+        });
+    });
+
+    describe('validSelection$', () => {
+        it('is invalid with the default selection on no tabs', () => {
+            const callback = StreamCallback();
+            tabs.validSelection$.subscribe(callback);
+
+            const valid = callback.lastEvent();
+            expect(valid).to.be.false;
+        });
+
+        it('is valid with the default selection on a single tab', () => {
+            const callback = StreamCallback();
+            tabs.validSelection$.subscribe(callback);
+            names$.onNext(['first tab']);
+
+            const valid = callback.lastEvent();
+            expect(valid).to.be.true;
+        });
+
+        it('is valid when the second tab is clicked with two tabs', () => {
+            const callback = StreamCallback();
+            tabs.validSelection$.subscribe(callback);
+            names$.onNext(['first tab', 'second tab']);
+
+            click$.onNext({ target: { dataset: { index: 1 } } });
+
+            const valid = callback.lastEvent();
+            expect(valid).to.be.true;
+        });
+
+        it('is valid when the second tab is selected externally with two tabs', () => {
+            const callback = StreamCallback();
+            tabs.validSelection$.subscribe(callback);
+            names$.onNext(['first tab', 'second tab']);
+
+            tabs.selection$.onNext(1);
+
+            const valid = callback.lastEvent();
+            expect(valid).to.be.true;
+        });
+
+        it('is invalid when an index past the number of tabs is selected externally', () => {
+            const callback = StreamCallback();
+            tabs.validSelection$.subscribe(callback);
+            names$.onNext(['first tab', 'second tab']);
+
+            tabs.selection$.onNext(2);
+
+            const valid = callback.lastEvent();
+            expect(valid).to.be.false;
+        });
+
+        it('is invalid when an invalid index is selected externally', () => {
+            const callback = StreamCallback();
+            tabs.validSelection$.subscribe(callback);
+            names$.onNext(['first tab', 'second tab']);
+
+            tabs.selection$.onNext(-1);
+
+            const valid = callback.lastEvent();
+            expect(valid).to.be.false;
+        });
+
+        it('is invalid when all tabs are removed', () => {
+            const callback = StreamCallback();
+            tabs.validSelection$.subscribe(callback);
+            names$.onNext(['first tab', 'second tab']);
+            tabs.selection$.onNext(1);
+
+            names$.onNext([]);
+
+            const valid = callback.lastEvent();
+            expect(valid).to.be.false;
         });
     });
 });

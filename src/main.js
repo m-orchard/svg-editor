@@ -34,7 +34,7 @@ function main(sources) {
     const addTabButton = AddTabButton({ DOM: sources.DOM, tabs$: svgs$, selection$: selection$, props$: addTabProps$ });
     const removeTabButton = RemoveTabButton({ DOM: sources.DOM, tabs$: svgs$, selection$: selection$ });
 
-    const validSelection$ = state$.map(state => (0 <= state.selection && state.selection < state.svgs.length));
+    const validSelection$ = tabs.validSelection$;
     const currentData$ = state$.withLatestFrom(validSelection$, (state, validSelection) => (validSelection ? state.svgs[state.selection].data : ''));
     const svgInput = TextArea({ DOM: sources.DOM, data$: currentData$, enabled$: validSelection$ });
     const input$ = svgInput.input$;
