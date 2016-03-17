@@ -12,23 +12,23 @@ function model(names$, selection$) {
     const initialNames$ = names$.startWith([]);
     const initialSelection$ = selection$.startWith(-1);
     return Observable.combineLatest(initialNames$, initialSelection$, (names, selection) =>
-        ({ names: names, selection: selection })
+        ({ names, selection })
     );
 }
 
 function view($state) {
-    return $state.map(function(state) {
-        const vtabs = state.names.map((name, index) =>
-            div('.tab' + (state.selection == index ? '.selected-tab' : ''), { dataset: { index: index } }, [name])
+    return $state.map(function({names, selection}) {
+        const vtabs = names.map((name, index) =>
+            div('.tab' + (selection == index ? '.selected-tab' : ''), { dataset: { index } }, [name])
         );
         return div('.tabs', vtabs);
     });
 }
 
-function Tabs(sources) {
-    const click$ = intent(sources.DOM);
-    click$.subscribe(sources.selection$);
-    const state$ = model(sources.names$, sources.selection$);
+function Tabs({DOM, selection$, names$}) {
+    const click$ = intent(DOM);
+    click$.subscribe(selection$);
+    const state$ = model(names$, selection$);
     const vtree$ = view(state$);
     return {
         DOM: vtree$

@@ -18,25 +18,26 @@ function main(sources) {
     const storedData = storage.get('svg-data');
     const selection$ = new BehaviorSubject(storedData ? storedData.selection : initialSelection);
     const svgs$ = new BehaviorSubject(storedData ? storedData.svgs : initialSVGs);
-    const names$ = svgs$.map(svgs => svgs.map(svg => svg.name));
-    const state$ = Observable.combineLatest(svgs$, selection$, (svgs, selection) => ({ svgs: svgs, selection: selection }));
-    const validSelection$ = state$.map(state => (0 <= state.selection && state.selection < state.svgs.length));
-    const currentData$ = state$.withLatestFrom(validSelection$, (state, validSelection) => (validSelection ? state.svgs[state.selection].data : ''));
+    const names$ = svgs$.map(svgs => svgs.map(({name}) => name));
+    const state$ = Observable.combineLatest(svgs$, selection$, (svgs, selection) => ({ svgs, selection }));
+    const validSelection$ = state$.map(({svgs, selection}) => (0 <= selection && selection < svgs.length));
+    const currentData$ = state$.withLatestFrom(validSelection$, ({svgs, selection}, validSelection) => (validSelection ? svgs[selection].data : ''));
 
     state$.subscribe(state => {
         storage.set('svg-data', state);
     });
 
-    const tabs = Tabs({ DOM: sources.DOM, names$: names$, selection$: selection$ });
-    const addTabButton = AddTabButton({ DOM: sources.DOM, tabs$: svgs$, selection$: selection$, props$: Observable.of({ tabName: 'svg' }) });
-    const removeTabButton = RemoveTabButton({ DOM: sources.DOM, tabs$: svgs$, selection$: selection$ });
-    const svgInput = TextArea({ DOM: sources.DOM, data$: currentData$, enabled$: validSelection$ });
+    const DOM = sources.DOM;
+    const tabs = Tabs({ DOM, names$, selection$ });
+    const addTabButton = AddTabButton({ DOM, tabs$: svgs$, selection$, props$: Observable.of({ tabName: 'svg' }) });
+    const removeTabButton = RemoveTabButton({ DOM, tabs$: svgs$, selection$ });
+    const svgInput = TextArea({ DOM, data$: currentData$, enabled$: validSelection$ });
     const svgRenderer = SVGRenderer({ value$: svgInput.value$ });
 
     const newSVGs$ = svgInput.input$.withLatestFrom(svgs$, selection$, (value, svgs, selection) => {
         const newSVGs = svgs.slice();
         newSVGs[selection] = { name: newSVGs[selection].name, data: value };
-        return svgs;
+        return newSVGs;
     });
     newSVGs$.subscribe(svgs$);
 

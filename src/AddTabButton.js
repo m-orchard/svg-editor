@@ -2,25 +2,26 @@ import Button from './Button';
 import {Observable} from 'rx';
 import isolate from '@cycle/isolate';
 
-function getNewTabs(tabs, name) {
+function getNewTabs({tabs, name}) {
     const newTabs = tabs.slice();
-    newTabs.push({ name: name, data: '' });
+    newTabs.push({ name, data: '' });
     return newTabs;
 }
 
-function getNewSelection(tabs) {
+function getNewSelection({tabs}) {
     return tabs.length - 1;
 }
 
-function AddTabButton(sources) {
-    const button = Button({ DOM: sources.DOM, props$: Observable.of({ label: '+' }) });
-    const tabs$ = sources.tabs$;
-    const stateOnClick$ = button.click$.withLatestFrom(tabs$, sources.props$, (click, tabs, props) => ({ tabs: tabs, name: props.tabName}));
-    const newTabs$ = stateOnClick$.map(state => getNewTabs(state.tabs, state.name));
+function AddTabButton({DOM, props$, tabs$, selection$}) {
+    const button = Button({ DOM, props$: Observable.of({ label: '+' }) });
+    const stateOnClick$ = button.click$.withLatestFrom(tabs$, props$, (click, tabs, {tabName}) => ({ tabs, name: tabName }));
+    const newTabs$ = stateOnClick$.map(getNewTabs);
     newTabs$.subscribe(tabs$);
-    const newSelection$ = stateOnClick$.map(state => getNewSelection(state.tabs));
-    newSelection$.subscribe(sources.selection$);
-    return button;
+    const newSelection$ = stateOnClick$.map(getNewSelection);
+    newSelection$.subscribe(selection$);
+    return {
+        DOM: button.DOM
+    };
 }
 
 export default sources => isolate(AddTabButton)(sources);

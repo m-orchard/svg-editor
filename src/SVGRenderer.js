@@ -6,17 +6,17 @@ function model(value$) {
     return value$.startWith('')
         .map(fromString)
         .map(sanitizeSVG)
-        .map(vnodes => ({ nodes: vnodes }));
+        .map(vnodes => ({vnodes}));
 }
 
 function view(state$) {
-    return state$.map(state =>
-        svg('svg', { attributes: { class: 'svg-renderer' } }, state.nodes)
+    return state$.map(({vnodes}) =>
+        svg('svg', { attributes: { class: 'svg-renderer' } }, vnodes)
     );
 }
 
-function SVGRenderer(sources) {
-    const state$ = model(sources.value$);
+function SVGRenderer({value$}) {
+    const state$ = model(value$);
     const vtree$ = view(state$);
     return {
         DOM: vtree$

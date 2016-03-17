@@ -1,5 +1,5 @@
 import {Observable} from 'rx';
-import {div, textarea} from '@cycle/dom';
+import {textarea} from '@cycle/dom';
 import isolate from '@cycle/isolate';
 
 function intent(DOMSource) {
@@ -12,29 +12,29 @@ function model(value$, enabled$) {
     const initialValue$ = value$.startWith('');
     const initialEnabled$ = enabled$.startWith(true);
     return Observable.combineLatest(initialValue$, initialEnabled$, (value, enabled) =>
-        ({ value: value, enabled: enabled })
+        ({ value, enabled })
     );
 }
 
 function view(state$) {
-    return state$.map(state => {
+    return state$.map(({enabled, value}) => {
         const attributes = {};
-        if(!state.enabled) {
+        if(!enabled) {
             attributes.disabled = true;
         }
-        return textarea({ value: state.value, attributes: attributes })
+        return textarea({ value, attributes })
     });
 }
 
-function TextArea(sources) {
-    const input$ = intent(sources.DOM);
-    const value$ = Observable.merge(input$, sources.data$)
-    const state$ = model(value$, sources.enabled$);
+function TextArea({DOM, data$, enabled$}) {
+    const input$ = intent(DOM);
+    const value$ = Observable.merge(input$, data$)
+    const state$ = model(value$, enabled$);
     const vtree$ = view(state$);
     return {
         DOM: vtree$,
-        input$: input$,
-        value$: value$
+        input$,
+        value$
     };
 }
 
