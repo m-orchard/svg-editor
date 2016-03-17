@@ -41,7 +41,7 @@ body {
 
 .right-controls {
     flex-grow: 1;
-    flex-direction: row-reverse;
+    justify-content: flex-end;
 }
 
 .tabs {
