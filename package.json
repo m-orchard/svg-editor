@@ -4,10 +4,10 @@
   "description": "A simple SVG editor.",
   "scripts": {
     "build": "npm run -s build:js && npm run -s build:css",
-    "build:js": "echo Building JavaScript... && mkdirp dist && browserify src/main.js -o dist/bundle.js -t [ babelify ] && echo JavaScript built!",
+    "build:js": "echo Building JavaScript... && mkdirp dist && browserify src/main.js -o dist/bundle.js -d -t [ babelify ] && echo JavaScript built!",
     "build:css": "echo Building CSS... && mkdirp dist && cp style/style.css dist && echo CSS built!",
     "test": "mocha test/specs/*.js -t 20000 --compilers js:babel-register",
-    "build:test": "echo Building tests... && mkdirp test/built && browserify test/main.js -o test/built/test.js -t [ babelify ] && echo Tests built!",
+    "build:test": "echo Building tests... && mkdirp test/built && browserify test/main.js -o test/built/test.js -d -t [ babelify ] && echo Tests built!",
     "watch": "concurrently -p \"none\" \"npm run -s watch:js\" \"npm run -s watch:css\"",
     "watch:js": "watch --wait 10 \"npm run -s build:js\" src",
     "watch:css": "watch --wait 10 \"npm run -s build:css\" style",
