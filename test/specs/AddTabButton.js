@@ -8,24 +8,26 @@ import {Observable, Subject, BehaviorSubject} from 'rx';
 describe('AddTabButton', () => {
     setup();
 
+    let tabs$, selection$, click$;
+
     const tabName = 'new tab';
-    let button, tabs$, selection$, props$, click$;
+    const originalTabs = [{ name: 'one tab', data: 'a'}, { name: 'two tab', data: 'b' }];
+    const newTabs = [{ name: 'one tab', data: 'a'}, { name: 'two tab', data: 'b' }, { name: tabName, data: '' }];
 
     beforeEach(() => {
         click$ = new Subject();
-        tabs$ = new BehaviorSubject([{ name: 'one tab', data: 'a'}, { name: 'two tab', data: 'b' }]);
+        tabs$ = new BehaviorSubject(originalTabs);
         selection$ = new BehaviorSubject(0);
-        props$ = new Observable.of({ tabName: tabName });
 
-        button = AddTabButton({
+        const button = AddTabButton({
             DOM: mockDOMSource({
                 ':root': {
                     'click': click$
                 }
             }),
-            tabs$: tabs$,
-            selection$: selection$,
-            props$: props$
+            props$: Observable.of({tabName}),
+            tabs$,
+            selection$,
         });
     });
 
@@ -35,11 +37,7 @@ describe('AddTabButton', () => {
             tabs$.subscribe(callback);
 
             const tabs = callback.lastEvent();
-            expect(tabs.length).to.equal(2);
-            expect(tabs[0].name).to.equal('one tab');
-            expect(tabs[0].data).to.equal('a');
-            expect(tabs[1].name).to.equal('two tab');
-            expect(tabs[1].data).to.equal('b');
+            expect(tabs).to.eql(originalTabs);
         });
 
         it('adds a new tab when clicked', () => {
@@ -49,13 +47,7 @@ describe('AddTabButton', () => {
             click$.onNext();
 
             const tabs = callback.lastEvent();
-            expect(tabs.length).to.equal(3);
-            expect(tabs[0].name).to.equal('one tab');
-            expect(tabs[0].data).to.equal('a');
-            expect(tabs[1].name).to.equal('two tab');
-            expect(tabs[1].data).to.equal('b');
-            expect(tabs[2].name).to.equal('new tab');
-            expect(tabs[2].data).to.equal('');
+            expect(tabs).to.eql(newTabs);
         });
     });
 

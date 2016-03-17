@@ -11,7 +11,7 @@ describe('SVGRenderer', () => {
 
     beforeEach(() => {
         value$ = new Subject();
-        renderer = SVGRenderer({ value$: value$ });
+        renderer = SVGRenderer({value$});
     });
 
     describe('DOM', () => {

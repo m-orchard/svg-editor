@@ -2,13 +2,26 @@ import {expect} from 'chai';
 import setup from '../helpers/setup';
 import StreamCallback from '../helpers/StreamCallback';
 import Tabs from '../../src/Tabs';
-import {mockDOMSource} from '@cycle/dom';
+import {div, mockDOMSource} from '@cycle/dom';
 import {Subject} from 'rx';
 
 describe('Tabs', () => {
     setup();
 
     let tabs, click$, names$, selection$;
+
+    const tab1Name = 'first tab';
+    const tab2Name = 'second tab';
+    const tab3Name = 'third tab';
+    const vemptyTabs = div('.tabs', []);
+    const voneTab = div('.tabs', [div('.tab', [tab1Name])]);
+    const vtwoTabs = div('.tabs', [div('.tab', [tab1Name]), div('.tab', [tab2Name])]);
+    const vsecondTabSelected = div('.tabs', [div('.tab', [tab1Name]), div('.tab.selected-tab', [tab2Name])]);
+    const vthreeTabs = div('.tabs', [div('.tab', [tab1Name]), div('.tab', [tab2Name]), div('.tab', [tab3Name])]);
+
+    function clickEvent(index) {
+        return { target: { dataset: {index} } };
+    }
 
     beforeEach(() => {
         click$ = new Subject();
@@ -21,8 +34,8 @@ describe('Tabs', () => {
                     'click': click$
                 }
             }),
-            names$: names$,
-            selection$: selection$
+            names$,
+            selection$
         });
     });
 
@@ -34,134 +47,71 @@ describe('Tabs', () => {
             names$.onNext([]);
 
             const vtree = callback.lastEvent();
-            expect(vtree.tagName).to.equal('DIV');
-            expect(vtree.properties.className).to.equal('tabs');
-            expect(vtree.children.length).to.equal(0);
+            expect(vtree).to.look.like(vemptyTabs);
         });
 
         it('renders a single tab', () => {
             const callback = StreamCallback();
             tabs.DOM.subscribe(callback);
 
-            const name = 'a single tab';
-            names$.onNext([name]);
+            names$.onNext([tab1Name]);
 
             const vtree = callback.lastEvent();
-            expect(vtree.tagName).to.equal('DIV');
-            expect(vtree.properties.className).to.equal('tabs');
-            expect(vtree.children.length).to.equal(1);
-            expect(vtree.children[0].tagName).to.equal('DIV');
-            expect(vtree.children[0].properties.className).to.equal('tab');
-            expect(vtree.children[0].children[0].text).to.equal(name);
+            expect(vtree).to.look.like(voneTab);
         });
 
         it('renders two tabs', () => {
             const callback = StreamCallback();
             tabs.DOM.subscribe(callback);
 
-            const firstName = 'first tab';
-            const secondName = 'second tab';
-            names$.onNext([firstName, secondName]);
+            names$.onNext([tab1Name, tab2Name]);
 
             const vtree = callback.lastEvent();
-            expect(vtree.tagName).to.equal('DIV');
-            expect(vtree.properties.className).to.equal('tabs');
-            expect(vtree.children.length).to.equal(2);
-            expect(vtree.children[0].tagName).to.equal('DIV');
-            expect(vtree.children[0].properties.className).to.equal('tab');
-            expect(vtree.children[0].children[0].text).to.equal(firstName);
-            expect(vtree.children[1].tagName).to.equal('DIV');
-            expect(vtree.children[1].properties.className).to.equal('tab');
-            expect(vtree.children[1].children[0].text).to.equal(secondName);
+            expect(vtree).to.look.like(vtwoTabs);
         });
 
         it('adds a tab', () => {
             const callback = StreamCallback();
             tabs.DOM.subscribe(callback);
 
-            const firstName = 'first tab';
-            const secondName = 'second tab';
-            const thirdName = 'third tab';
-            names$.onNext([firstName, secondName]);
-            names$.onNext([firstName, secondName, thirdName]);
+            names$.onNext([tab1Name, tab2Name]);
+            names$.onNext([tab1Name, tab2Name, tab3Name]);
 
             const vtree = callback.lastEvent();
-            expect(vtree.tagName).to.equal('DIV');
-            expect(vtree.properties.className).to.equal('tabs');
-            expect(vtree.children.length).to.equal(3);
-            expect(vtree.children[0].tagName).to.equal('DIV');
-            expect(vtree.children[0].properties.className).to.equal('tab');
-            expect(vtree.children[0].children[0].text).to.equal(firstName);
-            expect(vtree.children[1].tagName).to.equal('DIV');
-            expect(vtree.children[1].properties.className).to.equal('tab');
-            expect(vtree.children[1].children[0].text).to.equal(secondName);
-            expect(vtree.children[2].tagName).to.equal('DIV');
-            expect(vtree.children[2].properties.className).to.equal('tab');
-            expect(vtree.children[2].children[0].text).to.equal(thirdName);
+            expect(vtree).to.look.like(vthreeTabs);
         });
 
         it('removes a tab', () => {
             const callback = StreamCallback();
             tabs.DOM.subscribe(callback);
 
-            const firstName = 'first tab';
-            const secondName = 'second tab';
-            const thirdName = 'third tab';
-            names$.onNext([firstName, secondName, thirdName]);
-            names$.onNext([firstName, secondName]);
+            names$.onNext([tab1Name, tab2Name, tab3Name]);
+            names$.onNext([tab1Name, tab2Name]);
 
             const vtree = callback.lastEvent();
-            expect(vtree.tagName).to.equal('DIV');
-            expect(vtree.properties.className).to.equal('tabs');
-            expect(vtree.children.length).to.equal(2);
-            expect(vtree.children[0].tagName).to.equal('DIV');
-            expect(vtree.children[0].properties.className).to.equal('tab');
-            expect(vtree.children[0].children[0].text).to.equal(firstName);
-            expect(vtree.children[1].tagName).to.equal('DIV');
-            expect(vtree.children[1].properties.className).to.equal('tab');
-            expect(vtree.children[1].children[0].text).to.equal(secondName);
+            expect(vtree).to.look.like(vtwoTabs);
         });
 
         it('changes the selected tab when clicked', () => {
             const callback = StreamCallback();
             tabs.DOM.subscribe(callback);
 
-            const firstName = 'first tab';
-            const secondName = 'second tab';
-            names$.onNext([firstName, secondName]);
-            click$.onNext({ target: { dataset: { index: 1 } } })
+            names$.onNext([tab1Name, tab2Name]);
+            click$.onNext(clickEvent(1));
 
             const vtree = callback.lastEvent();
-            expect(vtree.tagName).to.equal('DIV');
-            expect(vtree.properties.className).to.equal('tabs');
-            expect(vtree.children.length).to.equal(2);
-            expect(vtree.children[0].tagName).to.equal('DIV');
-            expect(vtree.children[0].properties.className).to.equal('tab');
-            expect(vtree.children[0].children[0].text).to.equal(firstName);
-            expect(vtree.children[1].tagName).to.equal('DIV');
-            expect(vtree.children[1].properties.className).to.equal('tab selected-tab');
-            expect(vtree.children[1].children[0].text).to.equal(secondName);
+            expect(vtree).to.look.like(vsecondTabSelected);
         });
 
         it('changes the selected tab when selected externally', () => {
             const callback = StreamCallback();
             tabs.DOM.subscribe(callback);
 
-            const firstName = 'first tab';
-            const secondName = 'second tab';
-            names$.onNext([firstName, secondName]);
+            names$.onNext([tab1Name, tab2Name]);
             selection$.onNext(1);
 
             const vtree = callback.lastEvent();
-            expect(vtree.tagName).to.equal('DIV');
-            expect(vtree.properties.className).to.equal('tabs');
-            expect(vtree.children.length).to.equal(2);
-            expect(vtree.children[0].tagName).to.equal('DIV');
-            expect(vtree.children[0].properties.className).to.equal('tab');
-            expect(vtree.children[0].children[0].text).to.equal(firstName);
-            expect(vtree.children[1].tagName).to.equal('DIV');
-            expect(vtree.children[1].properties.className).to.equal('tab selected-tab');
-            expect(vtree.children[1].children[0].text).to.equal(secondName);
+            expect(vtree).to.look.like(vsecondTabSelected);
         });
     });
 
@@ -188,7 +138,7 @@ describe('Tabs', () => {
             const callback = StreamCallback();
             selection$.subscribe(callback);
 
-            click$.onNext({ target: { dataset: { index: 0 } } });
+            click$.onNext(clickEvent(0));
 
             const selection = callback.lastEvent();
             expect(selection).to.equal(0);
@@ -208,7 +158,7 @@ describe('Tabs', () => {
             const callback = StreamCallback();
             selection$.subscribe(callback);
 
-            click$.onNext({ target: { dataset: { index: 1 } } });
+            click$.onNext(clickEvent(1));
 
             const selection = callback.lastEvent();
             expect(selection).to.equal(1);

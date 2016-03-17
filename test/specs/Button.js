@@ -1,20 +1,20 @@
-import chai from 'chai';
+import chai, {expect} from 'chai';
 import setup from '../helpers/setup';
 import StreamCallback from '../helpers/StreamCallback';
 import Button from '../../src/Button';
-import {mockDOMSource} from '@cycle/dom';
+import {div, mockDOMSource} from '@cycle/dom';
 import {Observable, Subject} from 'rx';
 
 describe('Button', () => {
     setup();
-    const expect = chai.expect;
+
+    let button, click$;
 
     const label = 'Click Me!';
-    let button, props$, click$;
+    const vbutton = div('.button', [label]);
 
     beforeEach(() => {
         click$ = new Subject();
-        props$ = new Observable.of({ label: label });
 
         button = Button({
             DOM: mockDOMSource({
@@ -22,7 +22,7 @@ describe('Button', () => {
                     'click': click$
                 }
             }),
-            props$: props$
+            props$: Observable.of({label})
         });
     });
 
@@ -32,8 +32,7 @@ describe('Button', () => {
             button.DOM.subscribe(callback);
 
             const vtree = callback.lastEvent();
-            expect(vtree.tagName).to.equal('DIV');
-            expect(vtree.children[0].text).to.equal(label);
+            expect(vtree).to.look.like(vbutton);
         });
     });
 

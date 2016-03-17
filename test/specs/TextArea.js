@@ -1,15 +1,18 @@
-import chai from 'chai';
+import chai, {expect} from 'chai';
 import setup from '../helpers/setup';
 import StreamCallback from '../helpers/StreamCallback';
 import TextArea from '../../src/TextArea';
-import {mockDOMSource} from '@cycle/dom';
+import {textarea, mockDOMSource} from '@cycle/dom';
 import {Subject} from 'rx';
 
 describe('TextArea', () => {
     setup();
-    const expect = chai.expect;
 
     let textArea, input$, data$, enabled$;
+
+    function inputEvent(value) {
+        return { target: {value} };
+    };
 
     beforeEach(() => {
         input$ = new Subject();
@@ -21,8 +24,8 @@ describe('TextArea', () => {
                     'input': input$
                 }
             }),
-            data$: data$,
-            enabled$: enabled$
+            data$,
+            enabled$
         });
     });
 
@@ -32,11 +35,10 @@ describe('TextArea', () => {
             textArea.DOM.subscribe(callback);
 
             const input = 'some input';
-            input$.onNext({ target: { value: input } });
+            input$.onNext(inputEvent(input));
 
             const vtree = callback.lastEvent();
-            expect(vtree.tagName).to.equal('TEXTAREA');
-            expect(vtree.properties.value).to.equal(input);
+            expect(vtree).to.look.like(textarea({ value: input }));
         });
 
         it('renders a data value', () => {
@@ -47,8 +49,7 @@ describe('TextArea', () => {
             data$.onNext(data);
 
             const vtree = callback.lastEvent();
-            expect(vtree.tagName).to.equal('TEXTAREA');
-            expect(vtree.properties.value).to.equal(data);
+            expect(vtree).to.look.like(textarea({ value: data }));
         });
 
         it('does not have a disabled attribute when enabled', () => {
@@ -56,7 +57,7 @@ describe('TextArea', () => {
             textArea.DOM.subscribe(callback);
 
             const vtree = callback.lastEvent();
-            expect(vtree.properties.attributes.disabled).to.be.undefined;
+            expect(vtree).to.look.like(textarea({ attributes: { disabled: undefined }}));
         });
 
         it('has a disabled attribute when disabled', () => {
@@ -66,7 +67,7 @@ describe('TextArea', () => {
             enabled$.onNext(false);
 
             const vtree = callback.lastEvent();
-            expect(vtree.properties.attributes.disabled).to.be.true;
+            expect(vtree).to.look.like(textarea({ attributes: { disabled: true }}));
         });
 
         it('does not have a disabled attribute when reenabled', () => {
@@ -77,7 +78,7 @@ describe('TextArea', () => {
             enabled$.onNext(true);
 
             const vtree = callback.lastEvent();
-            expect(vtree.properties.attributes.disabled).to.be.undefined;
+            expect(vtree).to.look.like(textarea({ attributes: { disabled: undefined }}));
         });
     });
 
@@ -87,7 +88,7 @@ describe('TextArea', () => {
             textArea.value$.subscribe(callback);
 
             const input = 'some input';
-            input$.onNext({ target: { value: input } });
+            input$.onNext(inputEvent(input));
 
             const value = callback.lastEvent();
             expect(value).to.equal(input);
@@ -111,7 +112,7 @@ describe('TextArea', () => {
             textArea.input$.subscribe(callback);
 
             const input = 'some input';
-            input$.onNext({ target: { value: input } });
+            input$.onNext(inputEvent(input));
 
             const result = callback.lastEvent();
             expect(result).to.equal(input);

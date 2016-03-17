@@ -8,21 +8,26 @@ import {Observable, Subject, BehaviorSubject} from 'rx';
 describe('RemoveTabButton', () => {
     setup();
 
-    let button, tabs$, selection$, click$;
+    let tabs$, selection$, click$;
+
+    const tab1 = { name: 'one tab', data: 'a'};
+    const tab2 = { name: 'two tab', data: 'b' };
+    const tab3 = { name: 'three tab', data: 'c' };
+    const originalTabs = [tab1, tab2, tab3];
 
     beforeEach(() => {
         click$ = new Subject();
-        tabs$ = new BehaviorSubject([{ name: 'one tab', data: 'a'}, { name: 'two tab', data: 'b' }, { name: 'three tab', data: 'c' }]);
+        tabs$ = new BehaviorSubject(originalTabs);
         selection$ = new BehaviorSubject(0);
 
-        button = RemoveTabButton({
+        const button = RemoveTabButton({
             DOM: mockDOMSource({
                 ':root': {
                     'click': click$
                 }
             }),
-            tabs$: tabs$,
-            selection$: selection$
+            tabs$,
+            selection$
         });
     });
 
@@ -32,16 +37,42 @@ describe('RemoveTabButton', () => {
             tabs$.subscribe(callback);
 
             const tabs = callback.lastEvent();
-            expect(tabs.length).to.equal(3);
-            expect(tabs[0].name).to.equal('one tab');
-            expect(tabs[0].data).to.equal('a');
-            expect(tabs[1].name).to.equal('two tab');
-            expect(tabs[1].data).to.equal('b');
-            expect(tabs[2].name).to.equal('three tab');
-            expect(tabs[2].data).to.equal('c');
+            expect(tabs).to.eql(originalTabs);
         });
 
-        it('removes the only tab when clicked', () => {
+        it('removes the first tab when clicked with the initial selection', () => {
+            const callback = StreamCallback();
+            tabs$.subscribe(callback);
+
+            click$.onNext();
+
+            const tabs = callback.lastEvent();
+            expect(tabs).to.eql([tab2, tab3]);
+        });
+
+        it('removes the second tab when clicked with the second tab selected', () => {
+            const callback = StreamCallback();
+            tabs$.subscribe(callback);
+
+            selection$.onNext(1);
+            click$.onNext();
+
+            const tabs = callback.lastEvent();
+            expect(tabs).to.eql([tab1, tab3]);
+        });
+
+        it('removes the third tab when clicked with the third tab selected', () => {
+            const callback = StreamCallback();
+            tabs$.subscribe(callback);
+
+            selection$.onNext(2);
+            click$.onNext();
+
+            const tabs = callback.lastEvent();
+            expect(tabs).to.eql([tab1, tab2]);
+        });
+
+        it('removes all tabs when clicked repeatedly', () => {
             const callback = StreamCallback();
             tabs$.subscribe(callback);
             click$.onNext();
@@ -50,7 +81,7 @@ describe('RemoveTabButton', () => {
             click$.onNext();
 
             const tabs = callback.lastEvent();
-            expect(tabs.length).to.equal(0);
+            expect(tabs).to.eql([]);
         });
 
         it('does nothing when clicked with no tabs', () => {
@@ -63,51 +94,7 @@ describe('RemoveTabButton', () => {
             click$.onNext();
 
             const tabs = callback.lastEvent();
-            expect(tabs.length).to.equal(0);
-        });
-
-        it('removes the first tab when clicked with the initial selection', () => {
-            const callback = StreamCallback();
-            tabs$.subscribe(callback);
-
-            click$.onNext();
-
-            const tabs = callback.lastEvent();
-            expect(tabs.length).to.equal(2);
-            expect(tabs[0].name).to.equal('two tab');
-            expect(tabs[0].data).to.equal('b');
-            expect(tabs[1].name).to.equal('three tab');
-            expect(tabs[1].data).to.equal('c');
-        });
-
-        it('removes the second tab when clicked with the second tab selected', () => {
-            const callback = StreamCallback();
-            tabs$.subscribe(callback);
-
-            selection$.onNext(1);
-            click$.onNext();
-
-            const tabs = callback.lastEvent();
-            expect(tabs.length).to.equal(2);
-            expect(tabs[0].name).to.equal('one tab');
-            expect(tabs[0].data).to.equal('a');
-            expect(tabs[1].name).to.equal('three tab');
-            expect(tabs[1].data).to.equal('c');
-        });
-
-        it('removes the third tab when clicked with the third tab selected', () => {
-            const callback = StreamCallback();
-            tabs$.subscribe(callback);
-
-            selection$.onNext(2);
-            click$.onNext();
-
-            const tabs = callback.lastEvent();
-            expect(tabs.length).to.equal(2);
-            expect(tabs[0].name).to.equal('one tab');
-            expect(tabs[0].data).to.equal('a');
-            expect(tabs[1].name).to.equal('two tab');
-            expect(tabs[1].data).to.equal('b');
+            expect(tabs).to.eql([]);
         });
     });
 
