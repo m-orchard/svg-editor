@@ -22,7 +22,7 @@ describe('Button', () => {
                     'click': click$
                 }
             }),
-            props$: Observable.of({label})
+            props$: Observable.of({ label })
         });
     });
 

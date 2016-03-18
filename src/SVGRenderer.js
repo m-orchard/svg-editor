@@ -6,7 +6,7 @@ function model(value$) {
     return value$.startWith('')
         .map(fromString)
         .map(sanitizeSVG)
-        .map(vnodes => ({vnodes}));
+        .map(vnodes => ({ vnodes }));
 }
 
 function view(state$) {
@@ -15,7 +15,7 @@ function view(state$) {
     );
 }
 
-function SVGRenderer({value$}) {
+function SVGRenderer({ value$ }) {
     const state$ = model(value$);
     const vtree$ = view(state$);
     return {
@@ -23,4 +23,4 @@ function SVGRenderer({value$}) {
     };
 }
 
-export default sources => isolate(SVGRenderer)(sources);
+export default ({ value$ }) => isolate(SVGRenderer)({ value$ });

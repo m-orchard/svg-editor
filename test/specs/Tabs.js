@@ -20,7 +20,7 @@ describe('Tabs', () => {
     const vthreeTabs = div('.tabs', [div('.tab', [tab1Name]), div('.tab', [tab2Name]), div('.tab', [tab3Name])]);
 
     function clickEvent(index) {
-        return { target: { dataset: {index} } };
+        return { target: { dataset: { index } } };
     }
 
     beforeEach(() => {

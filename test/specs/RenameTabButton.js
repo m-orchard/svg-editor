@@ -1,11 +1,11 @@
 import {expect} from 'chai';
 import setup from '../helpers/setup';
 import StreamCallback from '../helpers/StreamCallback';
-import AddTabButton from '../../src/AddTabButton';
+import RenameTabButton from '../../src/RenameTabButton';
 import {mockDOMSource} from '@cycle/dom';
 import {Observable, Subject, BehaviorSubject} from 'rx';
 
-describe('AddTabButton', () => {
+describe('RenameTabButton', () => {
     setup();
 
     let tabs$, selection$, click$;
@@ -19,7 +19,7 @@ describe('AddTabButton', () => {
         tabs$ = new BehaviorSubject(originalTabs);
         selection$ = new BehaviorSubject(0);
 
-        const button = AddTabButton({
+        const button = RenameTabButton({
             DOM: mockDOMSource({
                 ':root': {
                     'click': click$

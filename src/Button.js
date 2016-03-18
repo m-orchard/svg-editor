@@ -9,10 +9,10 @@ function intent(DOMSource) {
 
 function view(props$) {
     return props$.startWith('')
-        .map(({label}) => div('.button', [label]));
+        .map(({ label }) => div('.button', [label]));
 }
 
-function Button({DOM, props$}) {
+function Button({ DOM, props$ }) {
     const click$ = intent(DOM);
     const vtree$ = view(props$);
     return {

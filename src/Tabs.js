@@ -25,7 +25,7 @@ function view($state) {
     });
 }
 
-function Tabs({DOM, selection$, names$}) {
+function Tabs({ DOM, selection$, names$ }) {
     const click$ = intent(DOM);
     click$.subscribe(selection$);
     const state$ = model(names$, selection$);
@@ -35,4 +35,4 @@ function Tabs({DOM, selection$, names$}) {
     };
 }
 
-export default sources => isolate(Tabs)(sources);
+export default ({ DOM, selection$, names$ }) => isolate(Tabs)({ DOM, selection$, names$ });

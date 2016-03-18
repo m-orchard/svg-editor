@@ -2,18 +2,18 @@ import Button from './Button';
 import {Observable} from 'rx';
 import isolate from '@cycle/isolate';
 
-function getNewTabs({tabs, selection}) {
+function getNewTabs({ tabs, selection }) {
     const newTabs = tabs.slice();
     newTabs.splice(selection, 1);
     return newTabs;
 }
 
-function getNewSelection({tabs, selection}) {
+function getNewSelection({ tabs, selection }) {
     const newSelection = selection == tabs.length ? selection - 1 : selection;
     return newSelection;
 }
 
-function RemoveTabButton({DOM, tabs$, selection$}) {
+function RemoveTabButton({ tabs$, selection$ }, { DOM }) {
     const button = Button({ DOM, props$: Observable.of({ label: '-' }) });
     const stateOnClick$ = button.click$.withLatestFrom(tabs$, selection$, (click, tabs, selection) => ({ tabs, selection }));
     const newTabs$ = stateOnClick$.map(getNewTabs);
@@ -25,4 +25,4 @@ function RemoveTabButton({DOM, tabs$, selection$}) {
     };
 }
 
-export default sources => isolate(RemoveTabButton)(sources);
+export default ({ DOM, tabs$, selection$ }) => isolate(RemoveTabButton)({ tabs$, selection$ }, { DOM });
