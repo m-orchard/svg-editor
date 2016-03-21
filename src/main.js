@@ -1,7 +1,8 @@
 import Tabs from './Tabs';
 import Input from './Input';
-import AddTabButton from './AddTabButton';
-import RemoveTabButton from './RemoveTabButton';
+import Button from './Button';
+import AddTab from './subject/AddTab';
+import RemoveTab from './subject/RemoveTab';
 import RenameTabButton from './RenameTabButton';
 import SVGRenderer from './SVGRenderer';
 import storage from './storage';
@@ -30,9 +31,14 @@ function main(sources) {
 
     const DOM = sources.DOM;
     const tabs = Tabs({ DOM, names$, selection$ });
-    const addTabButton = AddTabButton({ DOM, tabs$: svgs$, selection$, props$: Observable.of({ tabName: 'svg' }) });
+
+    const addTabButton = Button({ DOM, props$: Observable.of({ label: '+' }) });
+    addTabButton.click$.subscribe(AddTab({ tabs$: svgs$, selection$, name$: Observable.of('svg') }));
+
+    const removeTabButton = Button({ DOM, props$: Observable.of({ label: '-' }) });
+    removeTabButton.click$.subscribe(RemoveTab({ tabs$: svgs$, selection$ }));
+
     const renameTabButton = RenameTabButton({ DOM, tabs$: svgs$, selection$ });
-    const removeTabButton = RemoveTabButton({ DOM, tabs$: svgs$, selection$ });
     const svgInput = Input({ DOM, data$: currentData$, enabled$: validSelection$, type$: Observable.of('textarea') });
     const svgRenderer = SVGRenderer({ value$: svgInput.value$ });
 
