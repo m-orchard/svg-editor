@@ -6,3 +6,4 @@ import Tabs from './specs/Tabs';
 import SVGRenderer from './specs/SVGRenderer';
 import AddTab from './specs/subject/AddTab';
 import RemoveTab from './specs/subject/RemoveTab';
+import RenameTab from './specs/subject/RenameTab';

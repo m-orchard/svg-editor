@@ -1,9 +1,10 @@
 import Tabs from './Tabs';
 import Input from './Input';
+import InputDialog from './InputDialog';
 import Button from './Button';
 import AddTab from './subject/AddTab';
 import RemoveTab from './subject/RemoveTab';
-import RenameTabButton from './RenameTabButton';
+import RenameTab from './subject/RenameTab';
 import SVGRenderer from './SVGRenderer';
 import storage from './storage';
 import {Observable, BehaviorSubject} from 'rx';
@@ -23,7 +24,9 @@ function main(sources) {
     const names$ = svgs$.map(svgs => svgs.map(({ name }) => name));
     const state$ = Observable.combineLatest(svgs$, selection$, (svgs, selection) => ({ svgs, selection }));
     const validSelection$ = state$.map(({ svgs, selection }) => (0 <= selection && selection < svgs.length));
-    const currentData$ = state$.withLatestFrom(validSelection$, ({ svgs, selection }, validSelection) => (validSelection ? svgs[selection].data : ''));
+    const currentSVG$ = state$.withLatestFrom(validSelection$, ({ svgs, selection }, validSelection) => validSelection ? svgs[selection] : null);
+    const currentName$ = currentSVG$.map(svg => svg ? svg.name: '');
+    const currentData$ = currentSVG$.map(svg => svg ? svg.data: '');
 
     state$.subscribe(state => {
         storage.set('svg-data', state);
@@ -38,7 +41,11 @@ function main(sources) {
     const removeTabButton = Button({ DOM, props$: Observable.of({ label: '-' }) });
     removeTabButton.click$.subscribe(RemoveTab({ tabs$: svgs$, selection$ }));
 
-    const renameTabButton = RenameTabButton({ DOM, tabs$: svgs$, selection$ });
+    const renameTabButton = Button({ DOM, props$: Observable.of({ label: '_' }) });
+    const showRenameTabDialog$ = renameTabButton.click$.map(event => true);
+    const renameTabDialog = InputDialog({ DOM, valueOnShow$: currentName$, visible$: showRenameTabDialog$ });
+    renameTabDialog.confirm$.subscribe(RenameTab({ tabs$: svgs$, selection$ }));
+
     const svgInput = Input({ DOM, data$: currentData$, enabled$: validSelection$, type$: Observable.of('textarea') });
     const svgRenderer = SVGRenderer({ value$: svgInput.value$ });
 
@@ -53,7 +60,7 @@ function main(sources) {
     const vrightControls$ = Observable.combineLatest(renameTabButton.DOM, removeTabButton.DOM, (vrenameTabButton, vremoveTabButton) => div('.controls.right-controls', [vrenameTabButton, vremoveTabButton]));
     const vcontrols$ = Observable.combineLatest(vleftControls$, vrightControls$, (vleftControls, vrightControls) => div('.controls', [vleftControls, vrightControls]));
     const veditor$ = Observable.combineLatest(svgInput.DOM, svgRenderer.DOM, (vinput, vrenderer) => div('.svg-editor', [vinput, vrenderer]));
-    const vapp$ = Observable.combineLatest(vcontrols$, veditor$, (vcontrols, veditor) => div('.app', [vcontrols, veditor]));
+    const vapp$ = Observable.combineLatest(vcontrols$, veditor$, renameTabDialog.DOM, (vcontrols, veditor, vrenameTabDialog) => div('.app', [vcontrols, veditor, vrenameTabDialog]));
 
     return {
         DOM: vapp$

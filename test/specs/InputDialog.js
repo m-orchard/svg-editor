@@ -8,9 +8,9 @@ import {Subject} from 'rx';
 describe('InputDialog', () => {
     setup();
 
-    let dialog, visible$, data$, confirmClick$, cancelClick$, input$;
+    let dialog, visible$, valueOnShow$, confirmClick$, cancelClick$, input$;
 
-    const vdialog = div('.dialog-overlay', [div('.dialog', [input(), div('.dialog-controls')])]);
+    const vdialog = div('.dialog-overlay', [div('.dialog', [input({ value: undefined }), div('.dialog-controls')])]);
 
     function inputEvent(value) {
         return { target: { value } };
@@ -18,7 +18,7 @@ describe('InputDialog', () => {
 
     beforeEach(() => {
         visible$ = new Subject();
-        data$ = new Subject();
+        valueOnShow$ = new Subject();
         confirmClick$ = new Subject();
         cancelClick$ = new Subject();
         input$ = new Subject();
@@ -31,7 +31,7 @@ describe('InputDialog', () => {
                 }
             }),
             visible$,
-            data$
+            valueOnShow$
         });
     });
 
@@ -46,11 +46,11 @@ describe('InputDialog', () => {
             expect(vtree).to.look.like(vdialog);
         });
 
-        it('renders the dialog with data when made visible', () => {
+        it('renders the dialog with the initial value when made visible', () => {
             const callback = StreamCallback();
             dialog.DOM.subscribe(callback);
 
-            data$.onNext('some data');
+            valueOnShow$.onNext('some data');
             visible$.onNext(true);
 
             const vtree = callback.lastEvent();
@@ -58,26 +58,26 @@ describe('InputDialog', () => {
             expect(vtree.children[0].children[0]).to.look.like(input({ value: 'some data' }));
         });
 
-        it('does not change the input if the data changes when made visible', () => {
+        it('does not change the input if the initial value changes when made visible', () => {
             const callback = StreamCallback();
             dialog.DOM.subscribe(callback);
-            data$.onNext('some data');
+            valueOnShow$.onNext('some data');
             visible$.onNext(true);
 
-            data$.onNext('alternate data');
+            valueOnShow$.onNext('alternate data');
 
             const vtree = callback.lastEvent();
             expect(vtree).to.look.like(vdialog);
             expect(vtree.children[0].children[0]).to.look.like(input({ value: 'some data' }));
         });
 
-        it('renders the dialog with new data when made visible again', () => {
+        it('renders the dialog with new the initial value when made visible again', () => {
             const callback = StreamCallback();
             dialog.DOM.subscribe(callback);
-            data$.onNext('some data');
+            valueOnShow$.onNext('some data');
             visible$.onNext(true);
 
-            data$.onNext('alternate data');
+            valueOnShow$.onNext('alternate data');
             visible$.onNext(false);
             visible$.onNext(true);
 

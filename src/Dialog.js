@@ -40,9 +40,9 @@ function Dialog({ DOM, visible$, vcontent$ }) {
     const cancelButton = Button({ DOM, props$: Observable.of({ label: 'x' }) });
     const confirm$ = confirmButton.click$;
     const cancel$ = cancelButton.click$;
-    const hide$ = intent(confirm$, cancel$);
-    const visibleOnClose$ = Observable.merge(hide$, visible$);
-    const state$ = model(visibleOnClose$);
+    const close$ = intent(confirm$, cancel$);
+    const visibleOrClose$ = Observable.merge(close$, visible$);
+    const state$ = model(visibleOrClose$);
     const vcontents$ = getContentsStream(vcontent$, confirmButton.DOM, cancelButton.DOM);
     const vtree$ = view(state$, vcontents$);
     return {
