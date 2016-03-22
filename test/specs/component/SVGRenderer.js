@@ -1,7 +1,7 @@
 import {expect} from 'chai';
-import setup from '../helpers/setup';
-import StreamCallback from '../helpers/StreamCallback';
-import SVGRenderer from '../../src/SVGRenderer';
+import setup from '../../helpers/setup';
+import StreamCallback from '../../helpers/StreamCallback';
+import SVGRenderer from '../../../src/component/SVGRenderer';
 import {Subject} from 'rx';
 
 describe('SVGRenderer', () => {

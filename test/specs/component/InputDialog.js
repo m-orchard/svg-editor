@@ -1,7 +1,7 @@
 import chai, {expect} from 'chai';
-import setup from '../helpers/setup';
-import StreamCallback from '../helpers/StreamCallback';
-import InputDialog from '../../src/InputDialog';
+import setup from '../../helpers/setup';
+import StreamCallback from '../../helpers/StreamCallback';
+import InputDialog from '../../../src/component/InputDialog';
 import {div, input, mockDOMSource} from '@cycle/dom';
 import {Subject} from 'rx';
 

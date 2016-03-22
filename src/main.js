@@ -1,11 +1,11 @@
-import Tabs from './Tabs';
-import Input from './Input';
-import InputDialog from './InputDialog';
-import Button from './Button';
+import Tabs from './component/Tabs';
+import Input from './component/Input';
+import InputDialog from './component/InputDialog';
+import Button from './component/Button';
+import SVGRenderer from './component/SVGRenderer';
 import AddTab from './subject/AddTab';
 import RemoveTab from './subject/RemoveTab';
 import RenameTab from './subject/RenameTab';
-import SVGRenderer from './SVGRenderer';
 import storage from './storage';
 import {Observable, BehaviorSubject} from 'rx';
 import {run} from '@cycle/core';

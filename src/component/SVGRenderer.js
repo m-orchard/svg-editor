@@ -1,4 +1,4 @@
-import {fromString, sanitizeSVG} from './virtualize';
+import {fromString, sanitizeSVG} from './../virtualize';
 import {svg} from '@cycle/dom';
 import isolate from '@cycle/isolate';
 

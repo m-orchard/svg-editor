@@ -1,7 +1,7 @@
 import {expect} from 'chai';
-import setup from '../helpers/setup';
-import StreamCallback from '../helpers/StreamCallback';
-import Tabs from '../../src/Tabs';
+import setup from '../../helpers/setup';
+import StreamCallback from '../../helpers/StreamCallback';
+import Tabs from '../../../src/component/Tabs';
 import {div, mockDOMSource} from '@cycle/dom';
 import {Subject} from 'rx';
 
