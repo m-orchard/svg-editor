@@ -8,21 +8,27 @@ import {Subject} from 'rx';
 describe('Input', () => {
     setup();
 
-    let inputComponent, input$, data$, enabled$, type$;
+    let inputComponent, input$, keyup$, data$, enabled$, type$;
 
     function inputEvent(value) {
         return { target: { value } };
     };
 
+    function keyupEvent(value) {
+        return { keyCode: value };
+    };
+
     beforeEach(() => {
         input$ = new Subject();
+        keyup$ = new Subject();
         data$ = new Subject();
         enabled$ = new Subject();
         type$ = new Subject();
         inputComponent = Input({
             DOM: mockDOMSource({
                 ':root': {
-                    'input': input$
+                    'input': input$,
+                    'keyup': keyup$
                 }
             }),
             data$,
@@ -155,6 +161,19 @@ describe('Input', () => {
             data$.onNext('some data');
 
             expect(spy).not.to.be.called();
+        });
+    });
+
+    describe('keyup$', () => {
+        it('exposes a keyup event', () => {
+            const callback = StreamCallback();
+            inputComponent.keyup$.subscribe(callback);
+
+            const value = 3;
+            keyup$.onNext(keyupEvent(value));
+
+            const result = callback.lastEvent();
+            expect(result).to.equal(value);
         });
     });
 });

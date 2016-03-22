@@ -5,9 +5,13 @@ import isolate from '@cycle/isolate';
 const inputTypes = { input, textarea };
 
 function intent(DOMSource) {
-    return DOMSource.select(':root')
+    const input$ = DOMSource.select(':root')
         .events('input')
         .map(ev => ev.target.value);
+    const keyup$ = DOMSource.select(':root')
+        .events('keyup')
+        .map(ev => ev.key || ev.keyCode);
+    return { input$, keyup$ };
 }
 
 function model(value$, enabled$, type$) {
@@ -31,13 +35,14 @@ function view(state$) {
 }
 
 function Input({ DOM, data$, enabled$, type$ = Observable.empty() }) {
-    const input$ = intent(DOM);
+    const { input$, keyup$ } = intent(DOM);
     const value$ = Observable.merge(input$, data$)
     const state$ = model(value$, enabled$, type$);
     const vtree$ = view(state$);
     return {
         DOM: vtree$,
         input$,
+        keyup$,
         value$
     };
 }

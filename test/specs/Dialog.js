@@ -8,13 +8,14 @@ import {Subject} from 'rx';
 describe('Dialog', () => {
     setup();
 
-    let dialog, visible$, vcontent$, confirmClick$, cancelClick$;
+    let callback, dialog, visible$, vcontent$, confirmClick$, cancelClick$;
 
-    const vhiddenDialog = div('.dialog-hidden');
-    const vdialogControls = div('.dialog-controls', [div('.button'), div('.button')]);
-    const vemptyDialog = div('.dialog-overlay', [div('.dialog', [vdialogControls])]);
     const vcontent = div('.some-content', [span('.child-content')]);
-    const vdialogWithContent = div('.dialog-overlay', [div('.dialog', [vcontent, vdialogControls])]);
+    const vdialogControls = div('.dialog-controls', [div('.button'), div('.button')]);
+    const vemptyDialog = div('.dialog-overlay', [div('.dialog', [div(), vdialogControls])]);
+    const vhiddenEmptyDialog = div('.dialog-hidden', [vemptyDialog]);
+    const vdialog = div('.dialog-overlay', [div('.dialog', [vcontent, vdialogControls])]);
+    const vhiddenDialog = div('.dialog-hidden', [vdialog]);
 
     beforeEach(() => {
         visible$ = new Subject();
@@ -33,82 +34,64 @@ describe('Dialog', () => {
         });
     });
 
-    describe('DOM', () => {
-        it('renders an empty element when initially hidden', () => {
-            const callback = StreamCallback();
+    describe('DOM', function() {
+        beforeEach(() => {
+            callback = StreamCallback();
             dialog.DOM.subscribe(callback);
-
-            const vtree = callback.lastEvent();
-            expect(vtree).to.look.like(vhiddenDialog);
         });
 
-        it('renders the dialog when made visible without content', () => {
-            const callback = StreamCallback();
-            dialog.DOM.subscribe(callback);
-
-            visible$.onNext(true);
-
-            const vtree = callback.lastEvent();
-            expect(vtree).to.look.like(vemptyDialog);
+        describe('without content', () => {
+            DOMTests(vhiddenEmptyDialog, vemptyDialog);
         });
 
-        it('renders the dialog with content when made visible with content', () => {
-            const callback = StreamCallback();
-            dialog.DOM.subscribe(callback);
-            vcontent$.onNext(vcontent);
+        describe('with content', () => {
+            beforeEach(() => {
+                vcontent$.onNext(vcontent);
+            });
 
-            visible$.onNext(true);
-
-            const vtree = callback.lastEvent();
-            expect(vtree).to.look.like(vdialogWithContent);
+            DOMTests(vhiddenDialog, vdialog, true);
         });
 
-        it('renders an empty element when made hidden without content', () => {
-            const callback = StreamCallback();
-            dialog.DOM.subscribe(callback);
-            visible$.onNext(true);
+        function DOMTests(vhiddenDialog, vvisibleDialog) {
+            it('hides the empty dialog initially', () => {
+                const vtree = callback.lastEvent();
+                expect(vtree).to.look.like(vhiddenDialog);
+            });
 
-            visible$.onNext(false);
+            it('shows the dialog when made visible', () => {
+                visible$.onNext(true);
 
-            const vtree = callback.lastEvent();
-            expect(vtree).to.look.like(vhiddenDialog);
-        });
+                const vtree = callback.lastEvent();
+                expect(vtree).to.look.like(vvisibleDialog);
+            });
 
-        it('renders an empty element when made hidden with content', () => {
-            const callback = StreamCallback();
-            dialog.DOM.subscribe(callback);
-            vcontent$.onNext(div('.some-content', [span('.child-content')]));
-            visible$.onNext(true);
+            it('hides the dialog when made hidden', () => {
+                visible$.onNext(true);
 
-            visible$.onNext(false);
+                visible$.onNext(false);
 
-            const vtree = callback.lastEvent();
-            expect(vtree).to.look.like(vhiddenDialog);
-        });
+                const vtree = callback.lastEvent();
+                expect(vtree).to.look.like(vhiddenDialog);
+            });
 
-        it('renders an empty element when confirm is clicked', () => {
-            const callback = StreamCallback();
-            dialog.DOM.subscribe(callback);
-            vcontent$.onNext(div('.some-content', [span('.child-content')]));
-            visible$.onNext(true);
+            it('hides the dialog when confirm is clicked', () => {
+                visible$.onNext(true);
 
-            confirmClick$.onNext();
+                confirmClick$.onNext();
 
-            const vtree = callback.lastEvent();
-            expect(vtree).to.look.like(vhiddenDialog);
-        });
+                const vtree = callback.lastEvent();
+                expect(vtree).to.look.like(vhiddenDialog);
+            });
 
-        it('renders an empty element when cancel is clicked', () => {
-            const callback = StreamCallback();
-            dialog.DOM.subscribe(callback);
-            vcontent$.onNext(div('.some-content', [span('.child-content')]));
-            visible$.onNext(true);
+            it('hides the dialog when cancel is clicked', () => {
+                visible$.onNext(true);
 
-            cancelClick$.onNext();
+                cancelClick$.onNext();
 
-            const vtree = callback.lastEvent();
-            expect(vtree).to.look.like(vhiddenDialog);
-        });
+                const vtree = callback.lastEvent();
+                expect(vtree).to.look.like(vhiddenDialog);
+            });
+        }
     });
 
     describe('confirm$', () => {

@@ -1,0 +1,1 @@
+A simple SVG editor as practice using [CycleJS](http://cycle.js.org/) and [RXJS](http://reactivex.io/).
